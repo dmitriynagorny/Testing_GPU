@@ -39,11 +39,8 @@ async def make_request(client, model: str, prompt: str, max_tokens: int = 2048) 
 
 # Основной метод для тестирования скорости генерации токенов
 async def test_generation_speed(
-    client, model: str, queries: Union[List[str], str], parallel_requests: int
+    client, model: str, query: str, parallel_requests: int
 ) -> Dict[int, Dict]:
-    if isinstance(queries, str):
-        queries = [queries]
-
     results = {}
 
     # Ограничиваем число параллельных запросов с помощью семафора
@@ -55,7 +52,7 @@ async def test_generation_speed(
 
     tasks = [
         sem_task(make_request(client, model, query))
-        for query in queries
+        for _ in range(parallel_requests)
     ]
 
     responses = await asyncio.gather(*tasks, return_exceptions=True)
@@ -73,7 +70,7 @@ async def test_generation_speed(
 # Пример использования
 if __name__ == "__main__":
 
-    test_queries = "Привет!"
+    test_query = "Привет!"
     parallel_requests = 5
 
     openai.api_key = API_KEY
@@ -81,7 +78,7 @@ if __name__ == "__main__":
     client = openai
 
     # Запуск теста
-    results = asyncio.run(test_generation_speed(client, MODEL, test_queries, parallel_requests))
+    results = asyncio.run(test_generation_speed(client, MODEL, test_query, parallel_requests))
 
     with open('data.json', 'w') as f:
         json.dump(results, f)
