@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "testing-gpu"
+version = "0.1.0"
+description = ""
+authors = ["Нагорный Дмитрий Александрович <nagornyyda1@edu.mos.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+httpx = "^0.28.1"
+openai = "^1.59.8"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
