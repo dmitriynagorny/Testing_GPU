@@ -2,33 +2,38 @@ import asyncio
 import time
 import json
 from typing import List, Union, Dict
-import openai
+from openai import OpenAI
 
-HOST = '1'
-PORT = 8000
+HOST = 'localhost'
+PORT = 11434
 PROTOCOL = 'http'
 
 BASE_URL = f"{PROTOCOL}://{HOST}:{PORT}/v1/"
-MODEL = f"GameScribes/Mistral-Nemo-AWQ"
-API_KEY = "<KEY>"
+MODEL = f"mistral-nemo"
+API_KEY = "ollama"
 
 
 # Функция для выполнения одного асинхронного запроса к модели
-async def make_request(client, model: str, prompt: str, max_tokens: int = 2048) -> Dict:
-    start_time = time.time()
+async def make_request(client: OpenAI, model: str, prompt: str, max_tokens: int = 2048) -> Dict:
+    start_time = time.perf_counter()
     try:
         response = await asyncio.to_thread(
             client.chat.completions.create,
             model=model,
             messages=[
-                {"role": "user", "content": prompt}
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": "Who won the world series in 2020?"},
+                {"role": "assistant", "content": "The LA Dodgers won in 2020."},
+                {"role": "user", "content": "Where was it played?"}
             ],
             max_tokens=max_tokens
         )
-        end_time = time.time()
+        end_time = time.perf_counter()
+
         output_text = response.choices[0].message.content
-        token_count = len(output_text.split())
+        token_count = response.usage.completion_tokens
         response_time = end_time - start_time
+        
         return {
             "response": output_text,
             "token_count": token_count,
@@ -71,11 +76,12 @@ async def test_generation_speed(
 if __name__ == "__main__":
 
     test_query = "Привет!"
-    parallel_requests = 5
+    parallel_requests = 20
 
-    openai.api_key = API_KEY
-    openai.api_base = BASE_URL
-    client = openai
+    client = OpenAI(
+        api_key=API_KEY,
+        base_url=BASE_URL
+        )
 
     # Запуск теста
     results = asyncio.run(test_generation_speed(client, MODEL, test_query, parallel_requests))
