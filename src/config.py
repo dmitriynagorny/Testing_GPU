@@ -2,14 +2,12 @@
 
 MESSAGES=[
         {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": "Who won the world series in 2020?"},
-        {"role": "assistant", "content": "The LA Dodgers won in 2020."},
-        {"role": "user", "content": "Where was it played?"}
+        {"role": "user", "content": "Write 21 examples of sorting in python."},
     ]
 
 MAX_TOKENS = 2048
 # MAX_COMPLETION_TOKENS = 
-TOTAL_REQUESTS = 20
+TOTAL_REQUESTS = 5
 
 ### server params
 

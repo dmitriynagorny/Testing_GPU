@@ -4,15 +4,15 @@ import json
 from typing import List, Union, Dict
 
 from openai import OpenAI
+from openai import AsyncOpenAI  # Используем асинхронный клиент
 
 
 
 # Функция для выполнения одного Асинхронного запроса к модели
-async def amake_request(client: OpenAI, model: str, messages: list, max_tokens: int = 2048, temperature: float = 0.3, top_p: float = 0.9) -> Dict:
+async def amake_request(client: AsyncOpenAI, model: str, messages: list, max_tokens: int = 2048, temperature: float = 0.3, top_p: float = 0.9) -> Dict:
     start_time = time.perf_counter()
     try:
-        response = await asyncio.to_thread(
-            client.chat.completions.create,
+        response = await client.chat.completions.create(
             model=model,
             messages=messages,
             max_tokens=max_tokens,
@@ -122,7 +122,7 @@ if __name__ == "__main__":
 
     import config
 
-    client = OpenAI(
+    client = AsyncOpenAI(
         api_key=config.API_KEY,
         base_url=config.BASE_URL
         )
