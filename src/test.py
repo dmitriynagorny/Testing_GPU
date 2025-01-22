@@ -2,30 +2,19 @@ import asyncio
 import time
 import json
 from typing import List, Union, Dict
+
 from openai import OpenAI
 
-HOST = 'localhost'
-PORT = 8000
-PROTOCOL = 'http'
-
-BASE_URL = f"{PROTOCOL}://{HOST}:{PORT}/v1/"
-MODEL = f"GameScribes/Mistral-Nemo-AWQ"
-API_KEY = "ollama"
 
 
 # Функция для выполнения одного Асинхронного запроса к модели
-async def amake_request(client: OpenAI, model: str, prompt: str, max_tokens: int = 4096) -> Dict:
+async def amake_request(client: OpenAI, model: str, messages: list, max_tokens: int = 2048) -> Dict:
     start_time = time.perf_counter()
     try:
         response = await asyncio.to_thread(
             client.chat.completions.create,
             model=model,
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": "Who won the world series in 2020?"},
-                {"role": "assistant", "content": "The LA Dodgers won in 2020."},
-                {"role": "user", "content": "Where was it played?"}
-            ],
+            messages=messages,
             max_tokens=max_tokens
         )
         end_time = time.perf_counter()
@@ -42,22 +31,23 @@ async def amake_request(client: OpenAI, model: str, prompt: str, max_tokens: int
     except Exception as e:
         return {"error": str(e)}
 
+
 # Основной метод для тестирования скорости генерации токенов
 async def atest_generation_speed(
-    client, model: str, query: str, parallel_requests: int
+    client, config
 ) -> Dict[int, Dict]:
     results = {}
 
     # Ограничиваем число параллельных запросов с помощью семафора
-    semaphore = asyncio.Semaphore(parallel_requests)
+    semaphore = asyncio.Semaphore(config.TOTAL_REQUESTS)
 
     async def sem_task(task):
         async with semaphore:
             return await task
 
     tasks = [
-        sem_task(amake_request(client, model, query))
-        for _ in range(parallel_requests)
+        sem_task(amake_request(client, config.MODEL_NAME, config.MESSAGES))
+        for _ in range(config.TOTAL_REQUESTS)
     ]
 
     responses = await asyncio.gather(*tasks, return_exceptions=True)
@@ -72,18 +62,14 @@ async def atest_generation_speed(
     return results
 
 
+
 # CbpФункция для выполнения одного Синхронного запроса к модели
-def make_request(client: OpenAI, model: str, prompt: str, max_tokens: int = 2048) -> Dict:
+def make_request(client: OpenAI, model: str, messages: list, max_tokens: int = 2048) -> Dict:
     start_time = time.perf_counter()
     try:
         response = client.chat.completions.create(
             model=model,
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": "Who won the world series in 2020?"},
-                {"role": "assistant", "content": "The LA Dodgers won in 2020."},
-                {"role": "user", "content": "Where was it played?"}
-            ],
+            messages=messages,
             max_tokens=max_tokens
         )
         end_time = time.perf_counter()
@@ -102,14 +88,14 @@ def make_request(client: OpenAI, model: str, prompt: str, max_tokens: int = 2048
     
 
 def test_generation_speed(
-    client, model: str, query: str, parallel_requests: int
+    client, config
 ) -> Dict[int, Dict]:
     
     results = {}
 
     # Сохраняем результаты
-    for i in range(parallel_requests):
-        response = make_request(client, model, query)
+    for i in range(config.TOTAL_REQUESTS):
+        response = make_request(client, config.MODEL_NAME, config.MESSAGES, config.MAX_TOKENS)
         try:
             results[i] = response
         except:
@@ -122,20 +108,16 @@ def test_generation_speed(
 # Пример использования
 if __name__ == "__main__":
 
-    test_query = "Привет!"
-    parallel_requests = 5
+    import config
 
     client = OpenAI(
-        api_key=API_KEY,
-        base_url=BASE_URL
+        api_key=config.API_KEY,
+        base_url=config.BASE_URL
         )
 
     # Запуск теста
-    # results = asyncio.run(atest_generation_speed(client, MODEL, test_query, parallel_requests))
-    results = test_generation_speed(client, MODEL, test_query, parallel_requests)
-
-    # with open('data.json', 'w') as f:
-    #     json.dump(results, f)
+    results = asyncio.run(atest_generation_speed(client, config))
+    # results = test_generation_speed(client, config)
 
     # Вывод результатов
     for idx, result in results.items():
