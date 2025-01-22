@@ -1,0 +1,1 @@
+# сделать функцию atest_generation_speed, test_generation_speed прниимающую конфиг для передачи в модель
