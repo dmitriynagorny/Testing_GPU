@@ -8,14 +8,16 @@ from openai import OpenAI
 
 
 # Функция для выполнения одного Асинхронного запроса к модели
-async def amake_request(client: OpenAI, model: str, messages: list, max_tokens: int = 2048) -> Dict:
+async def amake_request(client: OpenAI, model: str, messages: list, max_tokens: int = 2048, temperature: float = 0.3, top_p: float = 0.9) -> Dict:
     start_time = time.perf_counter()
     try:
         response = await asyncio.to_thread(
             client.chat.completions.create,
             model=model,
             messages=messages,
-            max_tokens=max_tokens
+            max_tokens=max_tokens,
+            temperature=temperature,
+            top_p=top_p
         )
         end_time = time.perf_counter()
 
@@ -46,7 +48,12 @@ async def atest_generation_speed(
             return await task
 
     tasks = [
-        sem_task(amake_request(client, config.MODEL_NAME, config.MESSAGES))
+        sem_task(
+            amake_request(
+                client, 
+                config.MODEL_NAME, config.MESSAGES, config.MAX_TOKENS, config.TEMPERATURE, config.TOP_P
+                )
+            )
         for _ in range(config.TOTAL_REQUESTS)
     ]
 
@@ -64,13 +71,15 @@ async def atest_generation_speed(
 
 
 # CbpФункция для выполнения одного Синхронного запроса к модели
-def make_request(client: OpenAI, model: str, messages: list, max_tokens: int = 2048) -> Dict:
+def make_request(client: OpenAI, model: str, messages: list, max_tokens: int = 2048, temperature: float = 0.3, top_p: float = 0.9) -> Dict:
     start_time = time.perf_counter()
     try:
         response = client.chat.completions.create(
             model=model,
             messages=messages,
-            max_tokens=max_tokens
+            max_tokens=max_tokens,
+            temperature=temperature,
+            top_p=top_p
         )
         end_time = time.perf_counter()
 
@@ -95,7 +104,10 @@ def test_generation_speed(
 
     # Сохраняем результаты
     for i in range(config.TOTAL_REQUESTS):
-        response = make_request(client, config.MODEL_NAME, config.MESSAGES, config.MAX_TOKENS)
+        response = make_request(
+            client, 
+            config.MODEL_NAME, config.MESSAGES, config.MAX_TOKENS, config.TEMPERATURE, config.TOP_P
+            )
         try:
             results[i] = response
         except:
