@@ -11,7 +11,7 @@ TOTAL_REQUESTS = 5
 
 ### server params
 
-HOST = 'localhost'
+HOST = '81.94.159.217'
 PORT = 8000
 PROTOCOL = 'http'
 
