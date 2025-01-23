@@ -13,7 +13,7 @@ import creds
 import config
 
 
-BASE_URL = f"{config.PROTOCOL}://{config.HOST}:{config.PORT}/v1/"
+BASE_URL = f"{config.E_PROTOCOL}://{config.E_HOST}:{config.E_PORT}/v1/"
 
 # Initialize the OpenAI client
 client = AsyncOpenAI(api_key="v", base_url=BASE_URL)

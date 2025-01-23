@@ -40,10 +40,11 @@ async def amake_request(client: AsyncOpenAI, model: str, messages: list, max_tok
 async def atest_generation_speed(
     client, config
 ) -> Dict[int, Dict]:
-    results = {}
+    config_envs = {i:vars(config)[i] for i in vars(config) if 'E_' in i}
+    results = {"config":config_envs}
 
     # Ограничиваем число параллельных запросов с помощью семафора
-    semaphore = asyncio.Semaphore(config.TOTAL_REQUESTS)
+    semaphore = asyncio.Semaphore(config.E_TOTAL_REQUESTS)
 
     async def sem_task(task):
         async with semaphore:
@@ -53,10 +54,10 @@ async def atest_generation_speed(
         sem_task(
             amake_request(
                 client, 
-                config.MODEL_NAME, config.MESSAGES, config.MAX_TOKENS, config.TEMPERATURE, config.TOP_P
+                config.E_MODEL_NAME, config.E_MESSAGES, config.E_MAX_TOKENS, config.E_TEMPERATURE, config.E_TOP_P
                 )
             )
-        for _ in range(config.TOTAL_REQUESTS)
+        for _ in range(config.E_TOTAL_REQUESTS)
     ]
 
     responses = await asyncio.gather(*tasks, return_exceptions=True)
@@ -102,13 +103,14 @@ def test_generation_speed(
     client, config
 ) -> Dict[int, Dict]:
     
-    results = {}
+    config_envs = {i:vars(config)[i] for i in vars(config) if 'E_' in i}
+    results = {"config":config_envs}
 
     # Сохраняем результаты
-    for i in range(config.TOTAL_REQUESTS):
+    for i in range(config.E_TOTAL_REQUESTS):
         response = make_request(
             client, 
-            config.MODEL_NAME, config.MESSAGES, config.MAX_TOKENS, config.TEMPERATURE, config.TOP_P
+            config.E_MODEL_NAME, config.E_MESSAGES, config.E_MAX_TOKENS, config.E_TEMPERATURE, config.E_TOP_P
             )
         try:
             results[i] = response
@@ -153,11 +155,11 @@ if __name__ == "__main__":
     import config
 
     client = AsyncOpenAI(
-        api_key=config.API_KEY,
-        base_url=config.BASE_URL
+        api_key=config.E_API_KEY,
+        base_url=config.E_BASE_URL
         )
 
-    if config.REQUEST_ASYNC:
+    if config.E_REQUEST_ASYNC:
         # Запуск теста
         results = asyncio.run(atest_generation_speed(client, config))
     else:

@@ -55,8 +55,8 @@ if __name__ == "__main__":
 
     # Инициализация асинхронного клиента OpenAI
     client = AsyncOpenAI(
-        api_key=config.API_KEY,
-        base_url=config.BASE_URL
+        api_key=config.E_API_KEY,
+        base_url=config.E_BASE_URL
     )
 
     # Запуск теста
@@ -64,11 +64,11 @@ if __name__ == "__main__":
         result = asyncio.run(
             amake_request_with_ttft(
                 client,
-                model=config.MODEL_NAME,
-                messages=config.MESSAGES,
-                max_tokens=config.MAX_TOKENS,
-                temperature=config.TEMPERATURE,
-                top_p=config.TOP_P
+                model=config.E_MODEL_NAME,
+                messages=config.E_MESSAGES,
+                max_tokens=config.E_MAX_TOKENS,
+                temperature=config.E_TEMPERATURE,
+                top_p=config.E_TOP_P
             )
         )
     except Exception as e:
