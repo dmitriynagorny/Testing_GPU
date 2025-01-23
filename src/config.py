@@ -7,16 +7,17 @@ MESSAGES=[
 
 MAX_TOKENS = 2048
 # MAX_COMPLETION_TOKENS = 
-TOTAL_REQUESTS = 5
+TOTAL_REQUESTS = 2
+REQUEST_ASYNC = True
 
 ### server params
 
-HOST = '81.94.159.217'
-PORT = 8000
+HOST = 'localhost'
+PORT = 8008
 PROTOCOL = 'http'
 
 BASE_URL = f"{PROTOCOL}://{HOST}:{PORT}/v1/"
-MODEL_NAME = f"GameScribes/Mistral-Nemo-AWQ"
+MODEL_NAME = f"/model"
 API_KEY = "ollama"
 
 ### model params

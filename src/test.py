@@ -1,6 +1,8 @@
+import os
 import asyncio
 import time
 import json
+from datetime import datetime
 from typing import List, Union, Dict
 
 from openai import OpenAI
@@ -116,6 +118,34 @@ def test_generation_speed(
     return results
 
 
+def save_with_timestamp(results, folder='results'):
+    """
+    Save the given results to a JSON file with a timestamp in the specified folder.
+
+    Args:
+        results (dict): The data to save.
+        folder (str): The folder where the file will be saved. Defaults to 'results'.
+    """
+    # Create the folder if it doesn't exist
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+
+    # Generate a timestamp
+    timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+
+    # Create the filename with the timestamp
+    filename = f'data_{timestamp}.json'
+
+    # Specify the full path to save the file
+    file_path = os.path.join(folder, filename)
+
+    # Write the data to the file
+    with open(file_path, 'w') as f:
+        json.dump(results, f)
+
+    print(f'File saved: {file_path}')
+
+
 
 # Пример использования
 if __name__ == "__main__":
@@ -127,9 +157,13 @@ if __name__ == "__main__":
         base_url=config.BASE_URL
         )
 
-    # Запуск теста
-    results = asyncio.run(atest_generation_speed(client, config))
-    # results = test_generation_speed(client, config)
+    if config.REQUEST_ASYNC:
+        # Запуск теста
+        results = asyncio.run(atest_generation_speed(client, config))
+    else:
+        results = test_generation_speed(client, config)
+
+    save_with_timestamp(results, folder='results')  # Saves to a custom folder
 
     # Вывод результатов
     for idx, result in results.items():
