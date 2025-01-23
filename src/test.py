@@ -10,6 +10,51 @@ from openai import AsyncOpenAI  # Используем асинхронный к
 
 
 
+async def amake_request_with_ttft(
+    client: AsyncOpenAI,  # Используем асинхронный клиент
+    model: str, 
+    messages: List[Dict], 
+    max_tokens: int = 2048, 
+    temperature: float = 0.3, 
+    top_p: float = 0.9
+) -> Dict:
+    start_time = time.perf_counter()  # Фиксируем время начала запроса
+    first_token_time = None  # Время получения первого токена
+    output_text = ""  # Собранный текст ответа
+    token_count = 0  # Счетчик токенов
+
+    try:
+        # Используем stream=True для получения ответа по частям
+        response = await client.chat.completions.create(
+            model=model,
+            messages=messages,
+            max_tokens=max_tokens,
+            temperature=temperature,
+            top_p=top_p,
+            stream=True  # Включаем потоковый режим
+        )
+
+        # Обрабатываем потоковые данные с помощью async for
+        async for chunk in response:
+            if not first_token_time:
+                first_token_time = time.perf_counter()  # Фиксируем время первого токена
+            
+            if chunk.choices and chunk.choices[0].delta.content:
+                output_text += chunk.choices[0].delta.content
+                token_count += 1
+
+        end_time = time.perf_counter()  # Фиксируем время завершения запроса
+
+        return {
+            "response": output_text,
+            "token_count": token_count,
+            "response_time": end_time - start_time,  # Общее время выполнения
+            "time_to_first_token": first_token_time - start_time if first_token_time else None,  # Время до первого токена
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
+
 # Функция для выполнения одного Асинхронного запроса к модели
 async def amake_request(client: AsyncOpenAI, model: str, messages: list, max_tokens: int = 2048, temperature: float = 0.3, top_p: float = 0.9) -> Dict:
     start_time = time.perf_counter()
@@ -40,8 +85,8 @@ async def amake_request(client: AsyncOpenAI, model: str, messages: list, max_tok
 async def atest_generation_speed(
     client, config
 ) -> Dict[int, Dict]:
-    config_envs = {i:vars(config)[i] for i in vars(config) if 'E_' in i}
-    results = {"config":config_envs}
+    
+    result = {}
 
     # Ограничиваем число параллельных запросов с помощью семафора
     semaphore = asyncio.Semaphore(config.E_TOTAL_REQUESTS)
@@ -65,11 +110,11 @@ async def atest_generation_speed(
     # Сохраняем результаты
     for idx, response in enumerate(responses):
         if isinstance(response, Exception):
-            results[idx] = {"error": str(response)}
+            result[idx] = {"error": str(response)}
         else:
-            results[idx] = response
+            result[idx] = response
 
-    return results
+    return result
 
 
 
@@ -103,8 +148,7 @@ def test_generation_speed(
     client, config
 ) -> Dict[int, Dict]:
     
-    config_envs = {i:vars(config)[i] for i in vars(config) if 'E_' in i}
-    results = {"config":config_envs}
+    result = {}
 
     # Сохраняем результаты
     for i in range(config.E_TOTAL_REQUESTS):
@@ -113,11 +157,11 @@ def test_generation_speed(
             config.E_MODEL_NAME, config.E_MESSAGES, config.E_MAX_TOKENS, config.E_TEMPERATURE, config.E_TOP_P
             )
         try:
-            results[i] = response
+            result[i] = response
         except:
-            results[i] = {"error": str(response)}
+            result[i] = {"error": str(response)}
 
-    return results
+    return result
 
 
 def save_with_timestamp(results, folder='results'):
@@ -154,6 +198,9 @@ if __name__ == "__main__":
 
     import config
 
+    config_envs = {i:vars(config)[i] for i in vars(config) if 'E_' in i}
+    results = {"config":config_envs}
+
     client = AsyncOpenAI(
         api_key=config.E_API_KEY,
         base_url=config.E_BASE_URL
@@ -161,9 +208,23 @@ if __name__ == "__main__":
 
     if config.E_REQUEST_ASYNC:
         # Запуск теста
-        results = asyncio.run(atest_generation_speed(client, config))
+        results['main_test'] = asyncio.run(atest_generation_speed(client, config))
     else:
-        results = test_generation_speed(client, config)
+        results['main_test'] = test_generation_speed(client, config)
+
+    # время до первого токена
+    result_ttft = asyncio.run(
+        amake_request_with_ttft(
+            client,
+            model=config.E_MODEL_NAME,
+            messages=config.E_MESSAGES,
+            max_tokens=config.E_MAX_TOKENS,
+            temperature=config.E_TEMPERATURE,
+            top_p=config.E_TOP_P
+        )
+    )
+
+    results["ttft_test"] = result_ttft
 
     save_with_timestamp(results, folder='results')  # Saves to a custom folder
 

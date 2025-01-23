@@ -1,0 +1,43 @@
+{
+    "config": {
+        "E_MESSAGES": [
+            {
+                "role": "system",
+                "content": "You are a helpful assistant."
+            },
+            {
+                "role": "user",
+                "content": "Write 5 examples of sorting in python."
+            }
+        ],
+        "E_MAX_TOKENS": 2048,
+        "E_TOTAL_REQUESTS": 2,
+        "E_REQUEST_ASYNC": true,
+        "E_HOST": "localhost",
+        "E_PORT": 8008,
+        "E_PROTOCOL": "http",
+        "E_BASE_URL": "http://localhost:8008/v1/",
+        "E_MODEL_NAME": "/model",
+        "E_API_KEY": "ollama",
+        "E_TEMPERATURE": 0.3,
+        "E_TOP_P": 0.9
+    },
+    "main_test": {
+        "0": {
+            "response": "Sure, I'd be happy to provide five examples of sorting in Python using the built-in `sorted()` function and the `list.sort()` method. I'll also include an example using a custom sorting key.\n\n1. **Sorting a list of integers in ascending order:**\n\n```python\nnumbers = [6, 9, 3, 1, 5, 2, 8, 4, 7]\nsorted_numbers = sorted(numbers)\nprint(sorted_numbers)  # Output: [1, 2, 3, 4, 5, 6, 7, 8, 9]\n```\n\n2. **Sorting a list of strings in alphabetical order:**\n\n```python\nfruits = [\"apple\", \"banana\", \"cherry\", \"date\", \"elderberry\"]\nsorted_fruits = sorted(fruits)\nprint(sorted_fruits)  # Output: ['apple', 'banana', 'cherry', 'date', 'elderberry']\n```\n\n3. **Sorting a list of tuples based on the first element of each tuple:**\n\n```python\npoints = [(3, 7), (1, 5), (2, 3), (6, 9), (4, 2)]\nsorted_points = sorted(points, key=lambda x: x[0])\nprint(sorted_points)  # Output: [(1, 5), (2, 3), (3, 7), (4, 2), (6, 9)]\n```\n\n4. **Sorting a list in descending order:**\n\n```python\nnumbers = [6, 9, 3, 1, 5, 2, 8, 4, 7]\nsorted_numbers = sorted(numbers, reverse=True)\nprint(sorted_numbers)  # Output: [9, 8, 7, 6, 5, 4, 3, 2, 1]\n```\n\n5. **Sorting a list in-place using the list.sort() method:**\n\n```python\nnumbers = [6, 9, 3, 1, 5, 2, 8, 4, 7]\nnumbers.sort()\nprint(numbers)  # Output: [1, 2, 3, 4, 5, 6, 7, 8, 9]\n```\n\nIn each example, the `sorted()` function returns a new sorted list, leaving the original list unchanged. The `list.sort()` method sorts the list in-place, meaning it modifies the original list.",
+            "token_count": 537,
+            "response_time": 16.600093100001686
+        },
+        "1": {
+            "response": "Sure, here are five examples of sorting in Python using the built-in `sorted()` function and the `list.sort()` method. I'll also include an example using the `sorted()` function with a custom key.\n\n1. **Sorting a list of integers in ascending order:**\n\n```python\nnumbers = [6, 9, 3, 1, 5]\nsorted_numbers = sorted(numbers)\nprint(sorted_numbers)  # Output: [1, 3, 5, 6, 9]\n```\n\n2. **Sorting a list of integers in descending order:**\n\n```python\nnumbers = [6, 9, 3, 1, 5]\nsorted_numbers = sorted(numbers, reverse=True)\nprint(sorted_numbers)  # Output: [9, 6, 5, 3, 1]\n```\n\n3. **Sorting a list of strings alphabetically:**\n\n```python\nwords = [\"apple\", \"banana\", \"cherry\", \"date\", \"elderberry\"]\nsorted_words = sorted(words)\nprint(sorted_words)  # Output: ['apple', 'banana', 'cherry', 'date', 'elderberry']\n```\n\n4. **Sorting a list of tuples based on the second element:**\n\n```python\npeople = [(\"Alice\", 25), (\"Bob\", 30), (\"Charlie\", 22), (\"Diana\", 35)]\nsorted_people = sorted(people, key=lambda x: x[1])\nprint(sorted_people)  # Output: [('Charlie', 22), ('Alice', 25), ('Bob', 30), ('Diana', 35)]\n```\n\n5. **Sorting a list of objects based on a custom attribute (using `list.sort()` method):**\n\n```python\nclass Person:\n    def __init__(self, name, age):\n        self.name = name\n        self.age = age\n\n    def __repr__(self):\n        return f\"{self.name} ({self.age})\"\n\npeople = [Person(\"Alice\", 25), Person(\"Bob\", 30), Person(\"Charlie\", 22), Person(\"Diana\", 35)]\npeople.sort(key=lambda x: x.age)\nprint(people)  # Output: [Charlie (22), Alice (25), Bob (30), Diana (35)]\n```",
+            "token_count": 501,
+            "response_time": 15.552444299999479
+        }
+    },
+    "ttft_test": {
+        "response": "Sure, here are five examples of sorting in Python using the built-in `sorted()` function and the list's `sort()` method. I'll include sorting in ascending and descending order, as well as sorting with a custom key.\n\n1. **Sorting a list of integers in ascending order:**\n\n```python\nnumbers = [6, 9, 3, 1, 5]\nsorted_numbers = sorted(numbers)\nprint(sorted_numbers)  # Output: [1, 3, 5, 6, 9]\n```\n\n2. **Sorting a list of integers in descending order:**\n\n```python\nnumbers = [6, 9, 3, 1, 5]\nsorted_numbers = sorted(numbers, reverse=True)\nprint(sorted_numbers)  # Output: [9, 6, 5, 3, 1]\n```\n\n3. **Sorting a list of strings in alphabetical order:**\n\n```python\nfruits = ['banana', 'apple', 'cherry', 'date']\nsorted_fruits = sorted(fruits)\nprint(sorted_fruits)  # Output: ['apple', 'banana', 'cherry', 'date']\n```\n\n4. **Sorting a list of tuples based on the second element:**\n\n```python\npoints = [(1, 7), (1, 3), (3, 1), (2, 5)]\nsorted_points = sorted(points, key=lambda x: x[1])\nprint(sorted_points)  # Output: [(1, 3), (2, 5), (3, 1), (1, 7)]\n```\n\n5. **Sorting a list of objects by a custom attribute:**\n\n```python\nclass Person:\n    def __init__(self, name, age):\n        self.name = name\n        self.age = age\n\n    def __repr__(self):\n        return f\"{self.name} ({self.age})\"\n\npeople = [Person('Alice', 30), Person('Bob', 25), Person('Charlie', 35)]\nsorted_people = sorted(people, key=lambda x: x.age)\nprint(sorted_people)\n# Output: ['Bob (25)', 'Alice (30)', 'Charlie (35)']\n```\n\nIn the last example, the `key` parameter is used to specify a function of one argument that is used to extract a comparison key from each element in the list. In this case, we're sorting the `Person` objects based on their age.",
+        "token_count": 526,
+        "response_time": 16.61580529999992,
+        "time_to_first_token": 1.3576289000011457
+    }
+}
