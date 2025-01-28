@@ -7,18 +7,18 @@ E_MESSAGES=[
 
 E_MAX_TOKENS = 2048
 # MAX_COMPLETION_TOKENS = 
-E_TOTAL_REQUESTS = 5
+E_TOTAL_REQUESTS = 2
 E_REQUEST_ASYNC = True
 E_SEMAPHORE_TEST = False
 
 ### server params
 
 E_HOST = 'localhost'
-E_PORT = 11434
+E_PORT = 8008
 E_PROTOCOL = 'http'
 
 E_BASE_URL = f"{E_PROTOCOL}://{E_HOST}:{E_PORT}/v1/"
-E_MODEL_NAME = f"mistral-nemo"
+E_MODEL_NAME = f"/model"
 E_API_KEY = "ollama"
 
 ### model params

@@ -53,10 +53,68 @@ async def amake_request_with_ttft(
         }
     except Exception as e:
         return {"error": str(e)}
+    
+
+async def amake_request(
+    client: AsyncOpenAI,
+    model: str,
+    messages: list,
+    max_tokens: int = 2048,
+    temperature: float = 0.3,
+    top_p: float = 0.9
+) -> Dict:
+    start_time = time.perf_counter()
+    try:
+        response = await client.chat.completions.create(
+            model=model,
+            messages=messages,
+            max_tokens=max_tokens,
+            temperature=temperature,
+            top_p=top_p
+        )
+        end_time = time.perf_counter()
+
+        return {
+            "response": response.choices[0].message.content,
+            "token_count": response.usage.completion_tokens,
+            "response_time": end_time - start_time,
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
+
+async def atest_generation_speed(
+    client: AsyncOpenAI,
+    config: object
+) -> Dict[int, Dict]:
+    # Параметры запроса
+    request_params = {
+        "model": config.E_MODEL_NAME,
+        "messages": config.E_MESSAGES,
+        "max_tokens": config.E_MAX_TOKENS,
+        "temperature": config.E_TEMPERATURE,
+        "top_p": config.E_TOP_P
+    }
+
+    # Создаем задачи для всех запросов
+    tasks = [
+        amake_request(client, **request_params)
+        for _ in range(config.E_TOTAL_REQUESTS)
+    ]
+
+    # Выполняем все задачи одновременно
+    responses = await asyncio.gather(*tasks, return_exceptions=True)
+
+    # Формируем результат
+    return {
+        idx: response if not isinstance(response, Exception)
+        else {"error": str(response)}
+        for idx, response in enumerate(responses)
+    }
 
 
 # Функция для выполнения одного Асинхронного запроса к модели
-async def amake_request(client: AsyncOpenAI, model: str, messages: list, max_tokens: int = 2048, temperature: float = 0.3, top_p: float = 0.9) -> Dict:
+async def amake_sem_request(client: AsyncOpenAI, model: str, messages: list, max_tokens: int = 2048, temperature: float = 0.3, top_p: float = 0.9) -> Dict:
     start_time = time.perf_counter()
     try:
         response = await client.chat.completions.create(
@@ -82,7 +140,7 @@ async def amake_request(client: AsyncOpenAI, model: str, messages: list, max_tok
 
 
 # Основной метод для тестирования скорости генерации токенов
-async def atest_generation_speed(
+async def atest_sem_generation_speed(
     client, config
 ) -> Dict[int, Dict]:
     
@@ -97,7 +155,7 @@ async def atest_generation_speed(
 
     tasks = [
         sem_task(
-            amake_request(
+            amake_sem_request(
                 client, 
                 config.E_MODEL_NAME, config.E_MESSAGES, config.E_MAX_TOKENS, config.E_TEMPERATURE, config.E_TOP_P
                 )
@@ -207,8 +265,9 @@ if __name__ == "__main__":
         )
 
     if config.E_REQUEST_ASYNC:
-        # Запуск теста
         results['main_test'] = asyncio.run(atest_generation_speed(client, config))
+    elif config.E_SEMAPHORE_TEST:
+        results['main_test'] = asyncio.run(atest_sem_generation_speed(client, config))
     else:
         results['main_test'] = test_generation_speed(client, config)
 
