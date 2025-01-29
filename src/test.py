@@ -263,13 +263,21 @@ if __name__ == "__main__":
         api_key=config.E_API_KEY,
         base_url=config.E_BASE_URL
         )
+    
+    client_sync = OpenAI(
+        api_key=config.E_API_KEY,
+        base_url=config.E_BASE_URL
+        )
 
     if config.E_REQUEST_ASYNC:
+        print('async simple')
         results['main_test'] = asyncio.run(atest_generation_speed(client, config))
     elif config.E_SEMAPHORE_TEST:
+        print('async semaphore')
         results['main_test'] = asyncio.run(atest_sem_generation_speed(client, config))
     else:
-        results['main_test'] = test_generation_speed(client, config)
+        print('sync')
+        results['main_test'] = test_generation_speed(client_sync, config)
 
     # время до первого токена
     result_ttft = asyncio.run(
