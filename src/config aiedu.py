@@ -40,19 +40,19 @@ E_MESSAGES = [
 E_NVLINK = False
 E_MAX_TOKENS = 2048
 # MAX_COMPLETION_TOKENS = 
-E_TOTAL_REQUESTS = 500
+E_TOTAL_REQUESTS = 5
 E_REQUEST_ASYNC = True
 E_SEMAPHORE_TEST = False
 
 ### server params
 
-E_HOST = '176.99.133.184'
-E_PORT = 8000
+E_HOST = 'localhost'
+E_PORT = 8008
 E_PROTOCOL = 'http'
-E_GPU = "2x H100"
+E_GPU = "2x T4"
 
 E_BASE_URL = f"{E_PROTOCOL}://{E_HOST}:{E_PORT}/v1/"
-E_MODEL_NAME = f"GameScribes/Mistral-Nemo-AWQ"
+E_MODEL_NAME = f"/model"
 E_API_KEY = "l"
 
 ### model params
