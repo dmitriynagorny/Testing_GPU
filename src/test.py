@@ -7,6 +7,7 @@ from typing import List, Union, Dict
 
 from openai import OpenAI
 from openai import AsyncOpenAI  # Используем асинхронный клиент
+import config
 
 
 
@@ -187,12 +188,13 @@ def make_request(client: OpenAI, model: str, messages: list, max_tokens: int = 2
             temperature=temperature,
             top_p=top_p
         )
+
         end_time = time.perf_counter()
 
         output_text = response.choices[0].message.content
         token_count = response.usage.completion_tokens
         response_time = end_time - start_time
-        
+
         return {
             "response": output_text,
             "token_count": token_count,
@@ -214,6 +216,8 @@ def test_generation_speed(
             client, 
             config.E_MODEL_NAME, config.E_MESSAGES, config.E_MAX_TOKENS, config.E_TEMPERATURE, config.E_TOP_P
             )
+
+        end_time = time.perf_counter()
         try:
             result[i] = response
         except:
@@ -255,7 +259,6 @@ def save_with_timestamp(results, folder='results'):
 if __name__ == "__main__":
 
     import config
-
     config_envs = {i:vars(config)[i] for i in vars(config) if 'E_' in i}
     results = {"config":config_envs}
 
@@ -263,7 +266,8 @@ if __name__ == "__main__":
         api_key=config.E_API_KEY,
         base_url=config.E_BASE_URL
         )
-    
+
+
     client_sync = OpenAI(
         api_key=config.E_API_KEY,
         base_url=config.E_BASE_URL
@@ -290,6 +294,7 @@ if __name__ == "__main__":
             top_p=config.E_TOP_P
         )
     )
+
 
     results["ttft_test"] = result_ttft
 
